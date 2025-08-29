@@ -5,6 +5,7 @@ import { FaSearch, FaFilter, FaShoppingCart, FaHeart, FaStar } from 'react-icons
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../contexts/AuthContext';
+import { API_ENDPOINTS } from '../config/api';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -35,10 +36,11 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/api/v1/products/categories');
-      setCategories(response.data);
+      const response = await axios.get(API_ENDPOINTS.PRODUCTS.CATEGORIES);
+      setCategories(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setCategories([]);
     }
   };
 
@@ -56,11 +58,14 @@ const Products = () => {
       params.append('skip', (currentPage - 1) * 12);
       params.append('limit', 12);
 
-      const response = await axios.get(`/api/v1/products/?${params.toString()}`);
-      setProducts(response.data);
-      setTotalPages(Math.ceil(response.data.length / 12) + 1);
+      const response = await axios.get(`${API_ENDPOINTS.PRODUCTS.LIST}?${params.toString()}`);
+      const productsData = Array.isArray(response.data) ? response.data : [];
+      setProducts(productsData);
+      setTotalPages(Math.ceil(productsData.length / 12) + 1);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -219,7 +224,7 @@ const Products = () => {
         </div>
 
         {/* Products Grid */}
-        {products.length === 0 ? (
+        {!Array.isArray(products) || products.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">😔</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
