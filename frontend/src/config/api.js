@@ -1,31 +1,43 @@
-// API Configuration for different environments
-const API_CONFIG = {
-  development: {
-    baseURL: 'http://localhost:8000',
+// API Configuration
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+
+export const API_ENDPOINTS = {
+  BASE_URL: API_BASE_URL,
+  AUTH: {
+    LOGIN: `${API_BASE_URL}/api/v1/auth/login`,
+    REGISTER: `${API_BASE_URL}/api/v1/auth/register`,
+    ME: `${API_BASE_URL}/api/v1/auth/me`,
   },
-  production: {
-    baseURL: 'https://python-major-production.up.railway.app',
+  PRODUCTS: {
+    LIST: `${API_BASE_URL}/api/v1/products/`,
+    DETAIL: (id) => `${API_BASE_URL}/api/v1/products/${id}`,
+    CATEGORIES: `${API_BASE_URL}/api/v1/products/categories`,
+  },
+  CART: {
+    LIST: `${API_BASE_URL}/api/v1/cart/`,
+    ADD: `${API_BASE_URL}/api/v1/cart/`,
+    UPDATE: (id) => `${API_BASE_URL}/api/v1/cart/${id}`,
+    DELETE: (id) => `${API_BASE_URL}/api/v1/cart/${id}`,
+    CLEAR: `${API_BASE_URL}/api/v1/cart/`,
+  },
+  WISHLIST: {
+    LIST: `${API_BASE_URL}/api/v1/wishlist/`,
+    ADD: `${API_BASE_URL}/api/v1/wishlist/`,
+    DELETE: (id) => `${API_BASE_URL}/api/v1/wishlist/${id}`,
+    CLEAR: `${API_BASE_URL}/api/v1/wishlist/`,
+  },
+  ORDERS: {
+    LIST: `${API_BASE_URL}/api/v1/orders/`,
+    CREATE: `${API_BASE_URL}/api/v1/orders/`,
+    DETAIL: (id) => `${API_BASE_URL}/api/v1/orders/${id}`,
+    CANCEL: (id) => `${API_BASE_URL}/api/v1/orders/${id}/cancel`,
+  },
+  ADMIN: {
+    USERS: `${API_BASE_URL}/api/v1/admin/users`,
+    PRODUCTS: `${API_BASE_URL}/api/v1/admin/products`,
+    CATEGORIES: `${API_BASE_URL}/api/v1/admin/categories`,
+    ORDERS: `${API_BASE_URL}/api/v1/admin/orders`,
   },
 };
 
-// Get current environment - check for environment variable first
-const getEnvironment = () => {
-  if (process.env.REACT_APP_ENV) {
-    return process.env.REACT_APP_ENV;
-  }
-  return process.env.NODE_ENV === 'development' ? 'development' : 'production';
-};
-
-const currentEnv = getEnvironment();
-const currentConfig = API_CONFIG[currentEnv] || API_CONFIG.production;
-
-export const API_BASE_URL = currentConfig.baseURL;
-
-// For axios configuration
-export const axiosConfig = {
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-};
+export default API_ENDPOINTS;

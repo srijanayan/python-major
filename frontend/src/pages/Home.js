@@ -5,6 +5,7 @@ import { FaArrowRight, FaStar, FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../contexts/AuthContext';
+import { API_ENDPOINTS } from '../config/api';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -18,14 +19,18 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          axios.get('/api/v1/products/?limit=6'),
-          axios.get('/api/v1/products/categories')
+          axios.get(API_ENDPOINTS.PRODUCTS.LIST + '?limit=6'),
+          axios.get(API_ENDPOINTS.PRODUCTS.CATEGORIES)
         ]);
         
-        setFeaturedProducts(productsRes.data);
-        setCategories(categoriesRes.data);
+        // Ensure we have arrays and handle potential errors
+        setFeaturedProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
+        setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
       } catch (error) {
         console.error('Error fetching data:', error);
+        // Set empty arrays on error to prevent crashes
+        setFeaturedProducts([]);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -96,17 +101,23 @@ const Home = () => {
             Shop by Category
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/products?category=${category.id}`}
-                className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow"
-              >
-                <div className="text-4xl mb-4">📦</div>
-                <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                <p className="text-sm text-gray-600 mt-2">{category.description}</p>
-              </Link>
-            ))}
+            {Array.isArray(categories) && categories.length > 0 ? (
+              categories.map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/products?category=${category.id}`}
+                  className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow"
+                >
+                  <div className="text-4xl mb-4">📦</div>
+                  <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                  <p className="text-sm text-gray-600 mt-2">{category.description}</p>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-8">
+                No categories available
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -128,63 +139,69 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-gray-400 text-4xl">🖼️</div>
-                  )}
-                </div>
-                
-                <div className="p-6">
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {product.description}
-                  </p>
+            {Array.isArray(featuredProducts) && featuredProducts.length > 0 ? (
+              featuredProducts.map((product) => (
+                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="h-48 bg-gray-200 flex items-center justify-center">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-gray-400 text-4xl">🖼️</div>
+                    )}
+                  </div>
                   
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-primary-600">
-                      ${product.price}
-                    </span>
-                    <div className="flex items-center text-yellow-400">
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
-                      <FaStar />
+                  <div className="p-6">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {product.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-2xl font-bold text-primary-600">
+                        ${product.price}
+                      </span>
+                      <div className="flex items-center text-yellow-400">
+                        <FaStar />
+                        <FaStar />
+                        <FaStar />
+                        <FaStar />
+                        <FaStar />
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleAddToCart(product.id)}
+                        className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
+                      >
+                        <FaShoppingCart className="mr-2" />
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={() => handleAddToWishlist(product.id)}
+                        className={`p-2 rounded-lg border transition-colors ${
+                          isInWishlist(product.id)
+                            ? 'border-red-500 text-red-500 bg-red-50'
+                            : 'border-gray-300 text-gray-600 hover:border-red-500 hover:text-red-500'
+                        }`}
+                      >
+                        <FaHeart />
+                      </button>
                     </div>
                   </div>
-                  
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleAddToCart(product.id)}
-                      className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
-                    >
-                      <FaShoppingCart className="mr-2" />
-                      Add to Cart
-                    </button>
-                    <button
-                      onClick={() => handleAddToWishlist(product.id)}
-                      className={`p-2 rounded-lg border transition-colors ${
-                        isInWishlist(product.id)
-                          ? 'border-red-500 text-red-500 bg-red-50'
-                          : 'border-gray-300 text-gray-600 hover:border-red-500 hover:text-red-500'
-                      }`}
-                    >
-                      <FaHeart />
-                    </button>
-                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-8">
+                No products available
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
