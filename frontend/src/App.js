@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import { API_BASE_URL } from './config/api';
+import { API_ENDPOINTS } from './config/api';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -25,8 +25,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   // Configure axios base URL based on environment
   useEffect(() => {
-    axios.defaults.baseURL = API_BASE_URL;
-    console.log('API Base URL:', API_BASE_URL);
+    axios.defaults.baseURL = API_ENDPOINTS.BASE_URL;
+    console.log('API Base URL:', API_ENDPOINTS.BASE_URL);
   }, []);
 
   return (
