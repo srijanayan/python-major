@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { API_BASE_URL } from './config/api';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -21,6 +23,12 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  // Configure axios base URL based on environment
+  useEffect(() => {
+    axios.defaults.baseURL = API_BASE_URL;
+    console.log('API Base URL:', API_BASE_URL);
+  }, []);
+
   return (
     <AuthProvider>
       <CartProvider>

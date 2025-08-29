@@ -68,6 +68,8 @@ A modern, responsive React.js frontend for the E-commerce Backend API. Built wit
 ```
 frontend/
 ├── public/                 # Static files
+├── scripts/                # Utility scripts
+│   └── set-env.sh         # Environment switching script
 ├── src/
 │   ├── components/         # Reusable components
 │   │   ├── Navbar.js      # Navigation bar
@@ -86,6 +88,8 @@ frontend/
 │   │   ├── Wishlist.js    # User wishlist
 │   │   ├── Orders.js      # Order management
 │   │   └── AdminDashboard.js # Admin portal
+│   ├── config/            # Configuration files
+│   │   └── api.js         # API configuration
 │   ├── App.js             # Main app component
 │   ├── index.js           # Entry point
 │   └── index.css          # Global styles
@@ -172,15 +176,51 @@ Admin users have access to:
 
 ## 🔧 Configuration
 
+### API Configuration
+
+The frontend automatically detects the environment and uses the appropriate API URL:
+
+- **Development**: `http://localhost:8000` (for local development)
+- **Production**: `https://python-major-production.up.railway.app` (for production deployment)
+
+The configuration is handled in `src/config/api.js` and can be overridden with environment variables.
+
 ### Environment Variables
 
-The frontend is configured to proxy API requests to the backend:
+The frontend is configured to automatically use the correct API URL based on the environment:
 
-```json
-{
-  "proxy": "http://localhost:8000"
-}
+- **Development**: Uses `http://localhost:8000` (via proxy)
+- **Production**: Uses `https://python-major-production.up.railway.app`
+
+#### Quick Environment Switching
+
+Use the provided script to quickly switch between environments:
+
+```bash
+# Switch to development mode
+./scripts/set-env.sh dev
+
+# Switch to production mode
+./scripts/set-env.sh prod
+
+# Check current configuration
+./scripts/set-env.sh
 ```
+
+#### Manual Configuration
+
+You can also manually override this by setting environment variables:
+
+```bash
+# For development
+REACT_APP_ENV=development
+
+# For production
+REACT_APP_ENV=production
+REACT_APP_API_BASE_URL=https://python-major-production.up.railway.app
+```
+
+The proxy configuration in `package.json` is set to the production URL for production builds.
 
 ### Tailwind CSS
 
@@ -224,6 +264,8 @@ The `build` folder contains optimized production files that can be deployed to:
 - GitHub Pages
 - Any static hosting service
 
+**Note**: For production deployment, the frontend will automatically use the production API URL (`https://python-major-production.up.railway.app`). Make sure your backend is accessible at this URL.
+
 ## 🔌 API Integration
 
 The frontend integrates with the FastAPI backend through:
@@ -261,9 +303,10 @@ The frontend integrates with the FastAPI backend through:
 
 1. **API Connection Failed**
 
-   - Ensure backend is running on port 8000
+   - Ensure backend is running on the correct URL
    - Check CORS configuration
    - Verify proxy settings in package.json
+   - Check environment variables for API configuration
 
 2. **Authentication Issues**
 
